@@ -81,6 +81,23 @@ class Socks(User):
     def stream(self):
         return "socks"
 
+class Vless(User):
+    def __init__(self, uuid, user_number, encryption=None, email=None):
+        super(Vless, self).__init__(user_number, uuid, email)
+        self.encryption = encryption
+
+    def __str__(self):
+        if self.user_info:
+            return "Email: {self.user_info}\Protocol: {network}\nId: {password}\nEncryption: {self.encryption}\n".format(self=self, network=self.stream(), password=self.password)
+        else:
+            return "Protocol: {network}\nId: {password}\nEncryption: {self.encryption}\n".format(self=self, network=self.stream(), password=self.password)
+    
+    def stream(self):
+        return "VLESS"
+
+    def link(self, ip, port, tls):
+        return ""
+
 class Vmess(User):
     def __init__(self, uuid, alter_id: int, network: str, user_number, *, path=None, host=None, header=None, email=None, quic=None):
         super(Vmess, self).__init__(user_number, uuid, email)
@@ -192,7 +209,10 @@ TLS: {tls}
 {node}{tfo}
 {dyp}
             '''.format(self=self, color_ip=ColorStr.fuchsia(self.ip), node=node,tfo=tfo,dyp=dyp,tls=tls, port_way=port_way)
-            result = "{0}{1}\n\n{2}\n\n".format(result, temp.strip(), node.link(self.ip, int(self.port), self.tls))
+            link = node.link(self.ip, int(self.port), self.tls)
+            result = "{0}{1}\n\n".format(result, temp.strip())
+            if link:
+                result += "{}\n\n".format(link)             
         return result
 
     # 直接调用实例和打印一个实例显示的字符串一样
